@@ -53,9 +53,10 @@ def cargarFuente(nombre, size):
     return pygame.font.Font("assets/fuentes/" + nombre + ".ttf", size)
 
 # función utilizada para cargar imágenes asociadas a diferentes personajes del juego.
+#las cargo aca y no repito codigo cada vez q las necesite
 def getSprites(personaje):
     sprites = {}
-    if personaje == "jugador": # ballista
+    if personaje == "jugador": # ballista . me devuelve el array con las imagenes
         sprites["chasis"] = pygame.image.load("assets/img/jugador/chassis.png")
         sprites["reda_delantera"] = pygame.image.load("assets/img/jugador/front-wheel.png")
         sprites["rueda_trasera"] = pygame.image.load("assets/img/jugador/backwheel.png")
