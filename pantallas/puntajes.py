@@ -1,11 +1,14 @@
 import copy
-
+import json
+from archivos import*
 from pygame.locals import KEYDOWN, K_q, K_r
-
+from os.path import exists
 from estados import *
 from recursos import *
 from jugador import getPuntajeJugador, getEstatoJugador
+#from pantallas import nivel_i
 
+#vidas = 5
 # Función para mostrar la pantalla de puntuación
 def scores(pantalla, reloj, fuente):
     print("pantalla de puntos")
@@ -20,7 +23,7 @@ def scores(pantalla, reloj, fuente):
     # Obtener el estado y puntaje del jugador
     estadoJugador = getEstatoJugador()
     puntaje = getPuntajeJugador()
-
+   
     # Definir el texto de la puntuación según el estado del jugador
     if estadoJugador == "timeout":
         score_text = "Tiempo agotado\nTu puntaje es: x\n"

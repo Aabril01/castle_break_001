@@ -1,5 +1,6 @@
 import sys
-
+import json
+from jugador import *
 from estados import *
 from pantallas import inicial
 from pantallas import nivel_i
@@ -12,7 +13,7 @@ pygame.init()
 pantalla = pygame.display.set_mode(TAMANIO_PANTALLA)
 reloj = pygame.time.Clock()
 fuente = cargarFuente("Luminari", 40)
-
+#vidas = 5
 while obtenerEstadoActual() != estatesDic["SALIR"]:
     if obtenerEstadoActual() == estatesDic["INICIAL"]:
         inicial.pant_inic(pantalla, reloj, fuente)

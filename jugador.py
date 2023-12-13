@@ -8,7 +8,7 @@ angle = 30
 potencia = 30
 puntaje = 0
 estato = "Vivo"
-
+dragones_eliminados = 0
 # La función carga los sprites asociados al jugador
 def loadBallista():
     global ballista
@@ -81,3 +81,10 @@ def get_jugador_img():
     return ballista["arco"]
 
 
+def setDragones_eliminados():
+    global dragones_eliminados
+    dragones_eliminados += 1
+
+def getDragones_eliminados():
+    global dragones_eliminados
+    return dragones_eliminados

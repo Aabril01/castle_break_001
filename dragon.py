@@ -6,7 +6,7 @@ ultimAltura = [67, 73, 80]
 dragonSprites = []
 countCayendo = 0
 
-#creo un nuevo f¿dragon y lo agrego a la lista con sus caracteristicas
+#creo un nuevo dragon y lo agrego a la lista con sus caracteristicas
 def newDragon(init=False): # Si init es False (el valor predeterminado), la función  agrega un nuevo dragón sin reiniciar la lista existente de dragones.
     #la variable init se utiliza para determinar si se debe iniciar una nueva lista de dragones al agregar un dragon nuevo
     global lista_dragones
@@ -75,8 +75,8 @@ def remove_de_la_lista(item):
     global lista_dragones
     global countCayendo
     if item[4]: # si el quito elemneto de la lista es true
-        countCayendo -= 1 # se decrementa en 1 la variable global
-    lista_dragones.remove(item) # la eliminacion del elemento de la lista se realiza mas alla del valor del quinto elemento 
+        #countCayendo -= 1 # se decrementa en 1 la variable global
+        lista_dragones.remove(item) # la eliminacion del elemento de la lista se realiza mas alla del valor del quinto elemento 
 
 # acceso a la lista de dragones
 def getListaDragones():
@@ -87,7 +87,7 @@ def getListaDragones():
 def setFalling(index):
     global lista_dragones
     global countCayendo
-    if index < len(lista_dragones) and countCayendo < 2: #  Si el índice es válido (menor que la longitud de la lista de dragones) y la cantidad total de dragones que están cayendo es menor que 2
+    if index < len(lista_dragones): # and countCayendo < 2: #  Si el índice es válido (menor que la longitud de la lista de dragones) y la cantidad total de dragones que están cayendo es menor que 2
         lista_dragones[index][4] = True # se establece el quinto elemento del dragón en "cayendo" (True) 
         countCayendo += 1 # se incrementa la cuenta total de dragones cayendo.
 

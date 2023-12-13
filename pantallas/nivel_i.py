@@ -1,20 +1,23 @@
 import copy
 import math
 import random
-
+import os
+#print("Directorio actual:", os.getcwd())
 import pygame
 from pygame.locals import KEYDOWN, K_q, K_p, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE, K_ESCAPE
 
+from archivos import guardar_datos
 from castillo import *
 from dragon import *
 from estados import *
 from flecha import *
 from jugador import *
 from recursos import *
+#from puntajes import*
 
 timer = 60
 vidas = 5
-
+dragones_eliminados = 0
 
 def play(pantalla, reloj, fuente):
     global timer
@@ -50,13 +53,14 @@ def play(pantalla, reloj, fuente):
     actualizar_superficie(pantalla, fondo, tiempo_texto, tiempo_rect, puntos_texto, puntos_rect, corazones, ld, castillo_img, castillo_rect, flecha, False)
 
     disparando = False
-
+    #vidas, puntaje = cargar_datos()
+    #dragones_eliminados = 0 # contador de dragones creados
     timer_event = pygame.USEREVENT + 1 #  Se crea un evento personalizado 
     pygame.time.set_timer(timer_event, 1000) #1000 milis. # evento  para actualizar el temporizador en el juego.
     dragon_event = pygame.USEREVENT + 2 
     pygame.time.set_timer(dragon_event, 3500) # evento para generar nuevos dragones en el juego.
     falling_dragon_event = pygame.USEREVENT + 3 # evento perso
-    pygame.time.set_timer(falling_dragon_event, 2000) # dragones existentes caigan en el juego.
+    pygame.time.set_timer(falling_dragon_event, 1000) # dragones existentes caigan en el juego.
     while True:
         reloj.tick(60)
         t = pygame.time.get_ticks() / 980 #  t se utiliza para calcular el tiempo en función de los milisegundos transcurridos.
@@ -68,9 +72,11 @@ def play(pantalla, reloj, fuente):
                 setEstatoJugador("dead") # moriste
 
             setEstado(estatesDic["FINALIZADO"])
+            
             # reestablesco el timer y las vidas
             timer = 60
             vidas = 5
+            #guardar_datos(vidas, getPuntajeJugador())
             return True # el juego termino, salir del bucle
 
         moverDragones()
@@ -87,14 +93,15 @@ def play(pantalla, reloj, fuente):
                 tiempo_texto = fuente.render(str(timer), None, NEGRO)
                 tiempo_rect.center = TIMER_CENTER
             if evento.type == dragon_event:
-                newDragon() # crea un dragon
-            if evento.type == falling_dragon_event: # un dragon cae
-                drLista = getListaDragones() 
-                drLen = len(drLista) # calculo la long
-                if drLen >= 2: # si hay al menos 2 dragones en la lista. requerimiento de la caida
-                    keys = [i for i in range(1, drLen)] # lista que contiene indx de dragones, lo pongo en 1 porq el primero (0) no cae
-                    item = random.choice(keys) # seleccionar al azar un indice, el dragon q cae es al azar
-                    setFalling(item) # el dragon debe cambiar su estado a cayendo 
+                    newDragon()
+            if evento.type == falling_dragon_event:
+                drLista = getListaDragones()
+                drLen = len(drLista)
+                if drLen >= 2: #  si hay al menos 2 dragones en la lista. requerimiento de la caida
+                    keys = [i for i in range(1, drLen)] #  lista que contiene indx de dragones, lo pongo en 1 porq el primero (0) no cae
+                    item = random.choice(keys) # # seleccionar al azar un indice, el dragon q cae es al azar
+                    setFalling(item) # # el dragon debe cambiar su estado a cayendo 
+    
             if evento.type == KEYDOWN:
                 if evento.key == K_q:
                     setEstado(estatesDic["SALIR"])
@@ -103,7 +110,8 @@ def play(pantalla, reloj, fuente):
                 if evento.key == K_ESCAPE:
                     setEstado(estatesDic["FINALIZADO"])
                     timer = 60
-                    vidas = 5
+                    #vidas = 5
+                    guardar_datos(vidas, getPuntajeJugador())
                     return True
 
                 if evento.key == K_p:
@@ -272,42 +280,55 @@ def detectar_colisiones(pantalla, jugador, castillo, flecha, disparando):
     flecha_rect.x = get_x_flecha() # establesco posi horiz en pantalla segun la posi de la flecha
     flecha_rect.y = origen_y(get_y_flecha()) # establesco posi verti en la pantalla y convierto en coordenadas la posi y .
 
-    #pygame.draw.rect(pantalla, NARANJA, flecha_rect, 2)
 
     jugador_rect = jugador.get_rect() # rect de la img
     jugador_rect.y = TAMANIO_PANTALLA[1] - 120 # posi vert
     jugador_rect.x = 20 # posi hor.
+    
 
+    lista_dragones = getListaDragones()
 
-    #pygame.draw.rect(pantalla, VERDE, jugador_rect, 2)
-
-    lista_dragones = getListaDragones() 
     for idx, dragon in enumerate(lista_dragones): # obtengo el indice y el obejto en cada itera
         dragon_rect = getFrameRect(index=idx) # frame especif segun el indx pasado
-        #pygame.draw.rect(pantalla,  ROJO, dragon_rect, 2)
         if disparando:
             # flecha - dragones
             flecha_dragon_collide = pygame.Rect.colliderect(flecha_rect, dragon_rect)
             if disparando and flecha_dragon_collide:
-                remove_de_la_lista(dragon)
-                puntaje = getPuntajeJugador()
-                setPuntajeJugador(puntaje + 20)
+                centro_vertical_dragon = dragon_rect.y + dragon_rect.height // 2
+                if centro_vertical_dragon >= TAMANIO_PANTALLA[1] // 2:
+                    remove_de_la_lista(dragon)
+                    vidas -= 1
+                    actualizar_vidas(pantalla, getVidas(vidas))
+                else:
+                    remove_de_la_lista(dragon)
+                    puntaje = getPuntajeJugador()
+                    setPuntajeJugador(puntaje + 20)
+                    setDragones_eliminados()
 
-        # dragones - jugador
+        #dragones - jugador
         jugador_dragon_collide = pygame.Rect.colliderect(jugador_rect, dragon_rect)
         if jugador_dragon_collide:
             remove_de_la_lista(dragon)
             vidas -= 1
             actualizar_vidas(pantalla, getVidas(vidas))
 
-    castillo_rect = castillo.get_rect()
-    castillo_rect.center = (TAMANIO_PANTALLA[0] - (castillo_rect.width // 2), TAMANIO_PANTALLA[1] - 140)
-    #pygame.draw.rect(pantalla, AZUL, castillo_rect, 2)
+    if getDragones_eliminados() >= 2:
+        castillo_rect = castillo.get_rect()
+        castillo_rect.center = (TAMANIO_PANTALLA[0] - (castillo_rect.width // 2), TAMANIO_PANTALLA[1] - 140)
     # flecha - castillo
-    collide_castillo = pygame.Rect.colliderect(flecha_rect, castillo_rect)
-    if collide_castillo:
-        setEstatoJugador("win")
-        evt = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE)
-        pygame.event.post(evt)
-        reproducirSonidoCastilloRoto()
+        collide_castillo = pygame.Rect.colliderect(flecha_rect, castillo_rect)
+        if collide_castillo:
+            setEstatoJugador("win")
+            evt = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE)
+            pygame.event.post(evt)
+            reproducirSonidoCastilloRoto()
+
+    
     #pygame.display.flip()
+    
+
+
+#def eliminar_dragones_eliminados():
+    #global lista_dragones
+    # Filtrar la lista de dragones para mantener solo aquellos que no han sido marcados como eliminados
+    #lista_dragones = [dragon for dragon in lista_dragones if not dragon[5]]
